@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Learning Activity: Interactive learning objects</title>
+  <style>
+    :root{
+      --ink:#1f2a52;      /* brand: deep navy */
+      --teal:#00bec7;     /* brand: bright teal */
+      --mist:#d2f0f0;     /* brand: pale aqua */
+      --steel:#abb5bf;    /* brand: soft grey */
+      --white:#ffffff;
+
+      --radius: 14px;
+      --shadow: 0 10px 24px rgba(31,42,82,.12);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(1100px 500px at 10% 0%, rgba(0,190,199,.14), transparent 55%),
+        radial-gradient(900px 450px at 95% 10%, rgba(31,42,82,.10), transparent 60%),
+        linear-gradient(180deg, var(--mist), #f7fbfb 55%, #ffffff);
+      line-height:1.5;
+    }
+
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 16px 52px;
+    }
+
+    header{
+      background: var(--white);
+      border: 1px solid rgba(171,181,191,.45);
+      border-left: 10px solid var(--teal);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 18px 14px;
+    }
+
+    h1{
+      margin: 0 0 6px;
+      font-size: clamp(1.35rem, 2.2vw, 1.8rem);
+      letter-spacing: .2px;
+    }
+    .sub{
+      margin:0;
+      color: rgba(31,42,82,.85);
+      max-width: 70ch;
+    }
+
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top: 14px;
+    }
+    .pill{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,190,199,.45);
+      background: rgba(210,240,240,.65);
+      font-size: .92rem;
+    }
+    .pill strong{ color: var(--ink); }
+    .dot{
+      width:10px; height:10px; border-radius:50%;
+      background: var(--teal);
+      box-shadow: 0 0 0 3px rgba(0,190,199,.18);
+      flex: 0 0 auto;
+    }
+
+    main{
+      margin-top: 18px;
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .card{
+      background: var(--white);
+      border: 1px solid rgba(171,181,191,.55);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .card h2{
+      margin:0;
+      padding: 16px 16px 0;
+      font-size: 1.15rem;
+    }
+    .card .lead{
+      margin: 8px 16px 16px;
+      color: rgba(31,42,82,.88);
+      max-width: 78ch;
+    }
+
+    /* Accordion */
+    .accordion{
+      border-top: 1px solid rgba(171,181,191,.55);
+    }
+
+    .acc-item{
+      border-bottom: 1px solid rgba(171,181,191,.55);
+    }
+
+    /* Use a <button> so it is keyboard accessible by default */
+    .acc-trigger{
+      width:100%;
+      text-align:left;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      background: linear-gradient(180deg, rgba(210,240,240,.55), rgba(210,240,240,.25));
+      border:0;
+      color: var(--ink);
+      font-size: 1rem;
+      font-weight: 650;
+      cursor:pointer;
+    }
+
+    .acc-trigger:hover{
+      background: linear-gradient(180deg, rgba(0,190,199,.18), rgba(210,240,240,.25));
+    }
+
+    .acc-trigger:focus-visible{
+      outline: 3px solid rgba(0,190,199,.55);
+      outline-offset: 2px;
+      border-radius: 10px;
+    }
+
+    .acc-title{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .tag{
+      font-size:.78rem;
+      font-weight: 700;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+      color: var(--ink);
+      background: rgba(171,181,191,.28);
+      border: 1px solid rgba(171,181,191,.55);
+      padding: 3px 8px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+    }
+
+    /* Arrow at the end */
+    .chev{
+      flex: 0 0 auto;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,190,199,.55);
+      background: rgba(255,255,255,.9);
+      display:grid;
+      place-items:center;
+      position: relative;
+    }
+    .chev::before{
+      content:"";
+      width: 10px;
+      height: 10px;
+      border-right: 3px solid var(--ink);
+      border-bottom: 3px solid var(--ink);
+      transform: rotate(45deg);
+      transition: transform .2s ease;
+      margin-top: -2px;
+    }
+    /* Rotate arrow when expanded */
+    .acc-trigger[aria-expanded="true"] .chev::before{
+      transform: rotate(-135deg);
+      margin-top: 2px;
+    }
+
+    .acc-panel{
+      display:none;
+      padding: 0 16px 16px;
+      background: #ffffff;
+    }
+    .acc-panel[data-open="true"]{ display:block; }
+
+    .acc-panel p{
+      margin: 12px 0 0;
+      max-width: 80ch;
+    }
+
+    .callout{
+      margin-top: 12px;
+      background: rgba(0,190,199,.10);
+      border-left: 6px solid var(--teal);
+      padding: 12px 12px;
+      border-radius: 10px;
+    }
+
+    /* Activity elements */
+    .activity{
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px dashed rgba(31,42,82,.35);
+      border-radius: 12px;
+      background: rgba(210,240,240,.35);
+    }
+
+    .q{
+      margin: 0 0 10px;
+      font-weight: 650;
+    }
+
+    .choices{
+      display:grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style:none;
+    }
+
+    label.choice{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(171,181,191,.7);
+      background: rgba(255,255,255,.92);
+      cursor:pointer;
+    }
+    label.choice:hover{
+      border-color: rgba(0,190,199,.85);
+      box-shadow: 0 0 0 3px rgba(0,190,199,.15);
+    }
+
+    input[type="radio"], input[type="checkbox"]{
+      margin-top: 3px;
+      accent-color: var(--teal);
+    }
+
+    .btn-row{
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      margin-top: 12px;
+    }
+
+    button.btn{
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 700;
+      cursor:pointer;
+      color: var(--white);
+      background: var(--ink);
+    }
+    button.btn.secondary{
+      background: transparent;
+      color: var(--ink);
+      border: 2px solid rgba(31,42,82,.45);
+    }
+    button.btn:focus-visible{
+      outline: 3px solid rgba(0,190,199,.55);
+      outline-offset: 2px;
+    }
+
+    .feedback{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(171,181,191,.7);
+      background: rgba(255,255,255,.96);
+    }
+    .feedback.good{
+      border-color: rgba(0,190,199,.8);
+      background: rgba(210,240,240,.55);
+    }
+    .feedback.warn{
+      border-color: rgba(31,42,82,.35);
+      background: rgba(171,181,191,.18);
+    }
+
+    footer{
+      margin-top: 16px;
+      color: rgba(31,42,82,.82);
+      font-size: .95rem;
+    }
+
+    @media (min-width: 900px){
+      main{ grid-template-columns: 1.1fr .9fr; align-items:start; }
+      .sticky{
+        position: sticky;
+        top: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Learning Activity: Why interactive learning objects help when you’re learning something new</h1>
+      <p class="sub">
+        Interactive learning objects are small, focused activities you can click, try, and learn from.
+        They help you practise, check your understanding, and get feedback straight away.
+      </p>
+      <div class="pill-row" aria-label="What you will do">
+        <span class="pill"><span class="dot" aria-hidden="true"></span><strong>Time:</strong> 10–15 minutes</span>
+        <span class="pill"><span class="dot" aria-hidden="true"></span><strong>You will:</strong> explore, answer, reflect</span>
+        <span class="pill"><span class="dot" aria-hidden="true"></span><strong>Tip:</strong> use the arrows to open each section</span>
+      </div>
+    </header>
+
+    <main>
+      <!-- Left column -->
+      <section class="card" aria-labelledby="main-heading">
+        <h2 id="main-heading">Explore the ideas</h2>
+        <p class="lead">
+          Open each accordion section. Read, try the mini‑activity, and check your feedback.
+          You can redo activities as many times as you like.
+        </p>
+
+        <div class="accordion" id="accordion">
+          <!-- 1 -->
+          <div class="acc-item">
+            <button class="acc-trigger" type="button"
+              aria-expanded="false"
+              aria-controls="panel-1"
+              id="trigger-1">
+              <span class="acc-title">
+                <span class="tag">1</span>
+                What is an interactive learning object?
+              </span>
+              <span class="chev" aria-hidden="true"></span>
+            </button>
+
+            <div class="acc-panel" id="panel-1" role="region" aria-labelledby="trigger-1">
+              <p>
+                An interactive learning object is a small learning activity you can <strong>do</strong>, not just read.
+                For example: a drag‑and‑drop, a short quiz, a scenario, a simulation, or a quick matching game.
+              </p>
+              <div class="callout">
+                <strong>Why it helps:</strong> doing something active helps your brain notice what matters and remember it.
+              </div>
+
+              <div class="activity" aria-label="Mini activity 1">
+                <p class="q">Quick check: Which option is the best example of an interactive learning object?</p>
+                <ul class="choices">
+                  <li>
+                    <label class="choice">
+                      <input type="radio" name="q1" value="a" />
+                      A long page of text with no questions
+                    </label>
+                  </li>
+                  <li>
+                    <label class="choice">
+                      <input type="radio" name="q1" value="b" />
+                      A short quiz that gives you feedback straight away
+                    </label>
+                  </li>
+                  <li>
+                    <label class="choice">
+                      <input type="radio" name="q1" value="c" />
+                      A PDF you download and read later
+                    </label>
+                  </li>
+                </ul>
+
+                <div class="btn-row">
+                  <button class="btn" type="button" data-check="q1" data-answer="b">Check answer</button>
+                  <button class="btn secondary" type="button" data-reset="q1">Reset</button>
+                </div>
+
+                <div class="feedback" id="fb-q1" aria-live="polite" hidden></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2 -->
+          <div class="acc-item">
+            <button class="acc-trigger" type="button"
+              aria-expanded="false"
+              aria-controls="panel-2"
+              id="trigger-2">
+              <span class="acc-title">
+                <span class="tag">2</span>
+                How they help you learn a new topic
+              </span>
+              <span class="chev" aria-hidden="true"></span>
+            </button>
+
+            <div class="acc-panel" id="panel-2" role="region" aria-labelledby="trigger-2">
+              <p>
+                When you’re new to a topic, it’s easy to think “I get it” just because it looks familiar.
+                Interactive activities help you <strong>test yourself</strong> and spot gaps early.
+              </p>
+              <p>
+                They also help you practise in small steps. That makes learning feel more manageable.
+              </p>
+
+              <div class="activity" aria-label="Mini activity 2">
+                <p class="q">Choose <strong>two</strong> benefits of interactive activities:</p>
+                <ul class="choices">
+                  <li>
+                    <label class="choice">
+                      <input type="checkbox" name="q2" value="a" />
+                      You get feedback quickly
+                    </label>
+                  </li>
+                  <li>
+                    <label class="choice">
+                      <input type="checkbox" name="q2" value="b" />
+                      You can practise safely before doing it “for real”
+                    </label>
+                  </li>
+                  <li>
+                    <label class="choice">
+                      <input type="checkbox" name="q2" value="c" />
+                      You never need to think; the activity does everything for you
+                    </label>
+                  </li>
+                </ul>
+
+                <div class="btn-row">
+                  <button class="btn" type="button" data-check-multi="q2" data-answers="a,b">Check answers</button>
+                  <button class="btn secondary" type="button" data-reset="q2">Reset</button>
+                </div>
+
+                <div class="feedback" id="fb-q2" aria-live="polite" hidden></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3 -->
+          <div class="acc-item">
+            <button class="acc-trigger" type="button"
+              aria-expanded="false"
+              aria-controls="panel-3"
+              id="trigger-3">
+              <span class="acc-title">
+                <span class="tag">3</span>
+                What good interactive activities look like
+              </span>
+              <span class="chev" aria-hidden="true"></span>
+            </button>
+
+            <div class="acc-panel" id="panel-3" role="region" aria-labelledby="trigger-3">
+              <p>
+                Good activities are clear and short. They focus on one skill or idea.
+                They also give feedback that tells you <strong>what to do next</strong>.
+              </p>
+
+              <div class="callout">
+                <strong>Simple rule:</strong> if you get it wrong, you should learn something useful from the feedback.
+              </div>
+
+              <div class="activity" aria-label="Mini activity 3">
+                <p class="q">Reflection: Write one way feedback could help you improve.</p>
+                <label for="q3-text" style="display:block; font-weight:650; margin-bottom:8px;">
+                  Your idea (1–2 sentences)
+                </label>
+                <textarea id="q3-text" rows="3" style="
+                  width:100%;
+                  border-radius:12px;
+                  border:1px solid rgba(171,181,191,.75);
+                  padding:10px;
+                  font: inherit;
+                  outline: none;"
+                  placeholder="Example: Tell me which step I missed, then let me try again."></textarea>
+
+                <div class="btn-row">
+                  <button class="btn" type="button" id="q3-save">Save my reflection</button>
+                  <button class="btn secondary" type="button" id="q3-clear">Clear</button>
+                </div>
+
+                <div class="feedback" id="fb-q3" aria-live="polite" hidden></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 -->
+          <div class="acc-item">
+            <button class="acc-trigger" type="button"
+              aria-expanded="false"
+              aria-controls="panel-4"
+              id="trigger-4">
+              <span class="acc-title">
+                <span class="tag">4</span>
+                Try it: plan your own learning
+              </span>
+              <span class="chev" aria-hidden="true"></span>
+            </button>
+
+            <div class="acc-panel" id="panel-4" role="region" aria-labelledby="trigger-4">
+              <p>
+                Imagine you’re learning a brand‑new topic. Pick one thing you want to learn.
+                Then choose a type of activity that would help you practise it.
+              </p>
+
+              <div class="activity" aria-label="Mini activity 4">
+                <p class="q">Match the goal to an activity (choose one):</p>
+
+                <ul class="choices">
+                  <li>
+                    <label class="choice">
+                      <input type="radio" name="q4" value="a" />
+                      Goal: Learn key words — Activity: Matching game (word ↔ meaning)
+                    </label>
+                  </li>
+                  <li>
+                    <label class="choice">
+                      <input type="radio" name="q4" value="b" />
+                      Goal: Build confidence — Activity: Only watch a video, no practise
+                    </label>
+                  </li>
+                  <li>
+                    <label class="choice">
+                      <input type="radio" name="q4" value="c" />
+                      Goal: Apply steps — Activity: Scenario with choices and feedback
+                    </label>
+                  </li>
+                </ul>
+
+                <div class="btn-row">
+                  <button class="btn" type="button" data-check="q4" data-answer="a|c">Check answer</button>
+                  <button class="btn secondary" type="button" data-reset="q4">Reset</button>
+                </div>
+
+                <div class="feedback" id="fb-q4" aria-live="polite" hidden></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer>
+          <strong>Finish:</strong> If you want, go back and retry any activity. Repetition is a helpful part of learning.
+        </footer>
+      </section>
+
+      <!-- Right column -->
+      <aside class="card sticky" aria-labelledby="side-heading">
+        <h2 id="side-heading">Cheat sheet</h2>
+        <p class="lead">
+          Use this when you’re studying a new topic.
+        </p>
+
+        <div style="padding: 0 16px 16px;">
+          <div class="callout" style="margin-top:0;">
+            <p style="margin:0;">
+              <strong>Interactive learning objects help because they:</strong><br />
+              • make you practise (not just read)<br />
+              • give feedback quickly<br />
+              • help you spot what you don’t know yet<br />
+              • break learning into smaller steps
+            </p>
+          </div>
+
+          <div class="activity" style="margin-top:12px;">
+            <p class="q">Your next step</p>
+            <p style="margin:0 0 10px;">
+              Choose one topic you’re learning this week, and add one interactive activity to your study plan.
+            </p>
+            <label for="next-step" style="display:block; font-weight:650; margin-bottom:8px;">
+              Topic + activity
+            </label>
+            <input id="next-step" type="text" style="
+              width:100%;
+              border-radius:12px;
+              border:1px solid rgba(171,181,191,.75);
+              padding:10px;
+              font: inherit;"
+              placeholder="Example: New policy terms + matching game" />
+            <div class="btn-row">
+              <button class="btn" type="button" id="save-next">Save</button>
+              <button class="btn secondary" type="button" id="clear-next">Clear</button>
+            </div>
+            <div class="feedback" id="fb-next" aria-live="polite" hidden></div>
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    // Accordion behaviour
+    const triggers = document.querySelectorAll('.acc-trigger');
+    triggers.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        const panelId = btn.getAttribute('aria-controls');
+        const panel = document.getElementById(panelId);
+
+        // Toggle (single item at a time is clearer for learners)
+        triggers.forEach(other => {
+          if (other !== btn) {
+            other.setAttribute('aria-expanded', 'false');
+            const otherPanel = document.getElementById(other.getAttribute('aria-controls'));
+            otherPanel.dataset.open = "false";
+          }
+        });
+
+        btn.setAttribute('aria-expanded', String(!expanded));
+        panel.dataset.open = String(!expanded);
+      });
+    });
+
+    // Simple feedback helpers
+    function showFeedback(id, type, html){
+      const box = document.getElementById(id);
+      box.classList.remove('good','warn');
+      box.classList.add(type);
+      box.innerHTML = html;
+      box.hidden = false;
+    }
+    function hideFeedback(id){
+      const box = document.getElementById(id);
+      box.hidden = true;
+      box.innerHTML = '';
+      box.classList.remove('good','warn');
+    }
+
+    // Single-answer questions
+    document.querySelectorAll('[data-check]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.dataset.check;
+        const expectedRaw = btn.dataset.answer; // e.g. "b" or "a|c"
+        const expected = expectedRaw.split('|');
+
+        const selected = document.querySelector(`input[name="${name}"]:checked`);
+        const fbId = `fb-${name}`;
+
+        if(!selected){
+          showFeedback(fbId, 'warn', `<strong>Not yet.</strong> Choose an option, then select <em>Check answer</em>.`);
+          return;
+        }
+
+        const isCorrect = expected.includes(selected.value);
+        if(isCorrect){
+          showFeedback(
+            fbId,
+            'good',
+            `<strong>Nice work.</strong> That choice supports active practice and helpful feedback.`
+          );
+        } else {
+          showFeedback(
+            fbId,
+            'warn',
+            `<strong>Almost.</strong> Try again. Look for an option where you <em>do something</em> and get feedback.`
+          );
+        }
+      });
+    });
+
+    // Multi-answer questions
+    document.querySelectorAll('[data-check-multi]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.dataset.checkMulti;
+        const expected = (btn.dataset.answers || '').split(',').map(s => s.trim()).filter(Boolean);
+
+        const selected = Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(i => i.value);
+        const fbId = `fb-${name}`;
+
+        if(selected.length === 0){
+          showFeedback(fbId, 'warn', `<strong>Not yet.</strong> Choose your answers, then select <em>Check answers</em>.`);
+          return;
+        }
+
+        // Exact match: same items, no extras
+        const ok = selected.length === expected.length && selected.every(v => expected.includes(v));
+
+        if(ok){
+          showFeedback(
+            fbId,
+            'good',
+            `<strong>Correct.</strong> Fast feedback and safe practice are two big benefits.`
+          );
+        } else {
+          showFeedback(
+            fbId,
+            'warn',
+            `<strong>Close.</strong> Choose the options about <em>feedback</em> and <em>practice</em> (and avoid the one that says you never need to think).`
+          );
+        }
+      });
+    });
+
+    // Reset buttons
+    document.querySelectorAll('[data-reset]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.dataset.reset;
+        document.querySelectorAll(`input[name="${name}"]`).forEach(i => i.checked = false);
+        hideFeedback(`fb-${name}`);
+      });
+    });
+
+    // Reflection save/clear (stores only in the page, not sent anywhere)
+    const q3Save = document.getElementById('q3-save');
+    const q3Clear = document.getElementById('q3-clear');
+    const q3Text = document.getElementById('q3-text');
+
+    q3Save.addEventListener('click', () => {
+      const txt = (q3Text.value || '').trim();
+      if(!txt){
+        showFeedback('fb-q3', 'warn', `<strong>Not yet.</strong> Write one idea, then save it.`);
+        return;
+      }
+      showFeedback('fb-q3', 'good', `<strong>Saved.</strong> Great — clear feedback helps you improve faster.`);
+    });
+    q3Clear.addEventListener('click', () => {
+      q3Text.value = '';
+      hideFeedback('fb-q3');
+    });
+
+    // Next step save/clear
+    const saveNext = document.getElementById('save-next');
+    const clearNext = document.getElementById('clear-next');
+    const nextStep = document.getElementById('next-step');
+
+    saveNext.addEventListener('click', () => {
+      const txt = (nextStep.value || '').trim();
+      if(!txt){
+        showFeedback('fb-next', 'warn', `<strong>Not yet.</strong> Add a topic and an activity, then save.`);
+        return;
+      }
+      showFeedback('fb-next', 'good', `<strong>Saved.</strong> Nice plan. Short practice beats long reading.`);
+    });
+    clearNext.addEventListener('click', () => {
+      nextStep.value = '';
+      hideFeedback('fb-next');
+    });
+
+    // Open the first accordion section by default (helps learners start quickly)
+    const first = document.getElementById('trigger-1');
+    first.click();
+  </script>
+</body>
+</html>
